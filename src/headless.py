@@ -16,8 +16,13 @@ username_to_watch = "amphetamine4003"
 
 # Initialize the WebDriver
 options = webdriver.ChromeOptions()
-#options.add_argument("--headless")  # Comment out to run in normal mode
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument('--disable-gpu')
+options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(options=options)
+
 
 def login_to_chess_com():
     print("Navigating to Chess.com login page...")
