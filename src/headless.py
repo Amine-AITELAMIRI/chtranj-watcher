@@ -5,6 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 import requests
 import time
 import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import os
 
 # Configuration
 CHESS_URL = "https://www.chess.com/login/"
@@ -22,7 +24,6 @@ options.add_argument("--disable-dev-shm-usage")
 options.add_argument('--disable-gpu')
 options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(options=options)
-
 
 def login_to_chess_com():
     print("Navigating to Chess.com login page...")
@@ -180,6 +181,25 @@ def main():
         except:
             print("Watch button not found. Retrying...")
             time.sleep(5)  # Adjust the polling interval as needed
+
+# Define a simple HTTP server
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Headless script is running!")
+
+# Function to start the HTTP server
+def start_server():
+    port = int(os.environ.get("PORT", 8080))  # Render assigns a PORT environment variable
+    server_address = ('0.0.0.0', port)
+    httpd = HTTPServer(server_address, SimpleHandler)
+    print(f"Serving HTTP on port {port}")
+    httpd.serve_forever()
+
+# Start the HTTP server in a separate thread
+server_thread = threading.Thread(target=start_server, daemon=True)
+server_thread.start()
 
 if __name__ == "__main__":
     main()
