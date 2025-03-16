@@ -1,3 +1,2 @@
 Selenium
 requests
-threading
