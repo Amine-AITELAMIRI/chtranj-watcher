@@ -1,3 +1,4 @@
+import logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -16,6 +17,9 @@ USERNAME = "SMURFEEE"
 PASSWORD = "Aminousa1"
 username_to_watch = "amphetamine4003"
 
+# Initialize logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 # Initialize the WebDriver
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")
@@ -26,42 +30,42 @@ options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(options=options)
 
 def login_to_chess_com():
-    print("Navigating to Chess.com login page...")
+    logging.info("Navigating to Chess.com login page...")
     driver.get(CHESS_URL)
     
     try:
         # Find the username and password fields and the login button
-        print("Looking for username field...")
+        logging.info("Looking for username field...")
         username_field = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "login-username"))
         )
-        print("Username field found.")
+        logging.info("Username field found.")
         
-        print("Looking for password field...")
+        logging.info("Looking for password field...")
         password_field = driver.find_element(By.ID, "login-password")
-        print("Password field found.")
+        logging.info("Password field found.")
         
-        print("Looking for login button...")
+        logging.info("Looking for login button...")
         login_button = driver.find_element(By.ID, "login")
-        print("Login button found.")
+        logging.info("Login button found.")
         
         # Enter the username and password
-        print("Entering username and password...")
+        logging.info("Entering username and password...")
         username_field.send_keys(USERNAME)
         password_field.send_keys(PASSWORD)
         
         # Click the login button
-        print("Clicking the login button...")
+        logging.info("Clicking the login button...")
         login_button.click()
         
-        print("Login attempted.")
+        logging.info("Login attempted.")
     except Exception as e:
-        print(f"Login failed: {e}")
+        logging.error(f"Login failed: {e}")
         driver.save_screenshot("login_error.png")
-        print("Screenshot saved as login_error.png")
+        logging.info("Screenshot saved as login_error.png")
 
 def find_chess_board():
-    print("Searching for the chess board...")
+    logging.info("Searching for the chess board...")
     board_selectors = [
         'wc-chess-board',
         '#board-vs-personalities',
@@ -71,50 +75,50 @@ def find_chess_board():
     ]
     for selector in board_selectors:
         try:
-            print(f"Trying selector: {selector}")
+            logging.info(f"Trying selector: {selector}")
             board = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, selector))
             )
-            print(f"Board found with selector: {selector}")
+            logging.info(f"Board found with selector: {selector}")
             return board
         except:
-            print(f"Board not found with selector: {selector}")
+            logging.info(f"Board not found with selector: {selector}")
             continue
-    print("Chess board not found.")
+    logging.info("Chess board not found.")
     return None
 
 def get_fen():
-    print("Getting FEN from the board...")
+    logging.info("Getting FEN from the board...")
     board = find_chess_board()
     if board:
-        print("Board found, looking for FEN element...")
+        logging.info("Board found, looking for FEN element...")
         try:
             # Execute JavaScript to get the FEN from the game object
             fen = driver.execute_script("return arguments[0].game.getFEN();", board)
             if fen:
-                print(f"FEN found: {fen}")
+                logging.info(f"FEN found: {fen}")
                 return fen
             else:
-                print("FEN not found in the game object.")
+                logging.info("FEN not found in the game object.")
         except Exception as e:
-            print(f"Error finding FEN element: {e}")
+            logging.error(f"Error finding FEN element: {e}")
             driver.save_screenshot("fen_error.png")
-            print("Screenshot saved as fen_error.png")
-            print("Page source:")
-            print(driver.page_source)
-    print("FEN not found.")
+            logging.info("Screenshot saved as fen_error.png")
+            logging.info("Page source:")
+            logging.info(driver.page_source)
+    logging.info("FEN not found.")
     return None
 
 def send_to_backend(route, data):
-    print(f"Sending data to backend: {data}")
+    logging.info(f"Sending data to backend: {data}")
     response = requests.post(f"{BACKEND_URL}/{route}", json=data)
     if response.status_code == 200:
-        print(f"Successfully sent data to {route}")
+        logging.info(f"Successfully sent data to {route}")
     else:
-        print(f"Failed to send data to {route}: {response.text}")
+        logging.error(f"Failed to send data to {route}: {response.text}")
 
 def observe_board_changes():
-    print("Observing board changes...")
+    logging.info("Observing board changes...")
     previous_fen = None
     while True:
         fen = get_fen()
@@ -136,14 +140,14 @@ def check_for_new_username():
                 current_username = fetched_username
                 username_to_watch = fetched_username
                 new_username_flag = True
-                print(f"Fetched new username to watch: {username_to_watch}")
+                logging.info(f"Fetched new username to watch: {username_to_watch}")
                 
                 # Navigate to the user's profile page
                 profile_url = PROFILE_URL.format(username_to_watch)
-                print(f"Navigating to profile page: {profile_url}")
+                logging.info(f"Navigating to profile page: {profile_url}")
                 driver.get(profile_url)
         else:
-            print("Failed to fetch username to watch, using current.")
+            logging.error("Failed to fetch username to watch, using current.")
         
         time.sleep(60)  # Adjust the interval for checking the username as needed
 
@@ -162,24 +166,24 @@ def main():
         # Check if a new username has been fetched
         if new_username_flag:
             new_username_flag = False  # Reset the flag
-            print("New username detected, re-looking for the 'Watch' button...")
+            logging.info("New username detected, re-looking for the 'Watch' button...")
         
         # Continuously check for the presence of the "Watch" button
         try:
-            print("Looking for the 'Watch' button...")
+            logging.info("Looking for the 'Watch' button...")
             watch_button = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".presence-button-component.presence-button-visible .cc-button-component.cc-button-danger.cc-button-medium.cc-bg-danger"))
             )
-            print("Watch button detected! A game has started.")
+            logging.info("Watch button detected! A game has started.")
             
             # Click the "Watch" button
-            print("Clicking the 'Watch' button...")
+            logging.info("Clicking the 'Watch' button...")
             watch_button.click()
             
             # Once the button is detected and clicked, start observing the board for changes
             observe_board_changes()
         except:
-            print("Watch button not found. Retrying...")
+            logging.info("Watch button not found. Retrying...")
             time.sleep(5)  # Adjust the polling interval as needed
 
 # Define a simple HTTP server
@@ -194,7 +198,7 @@ def start_server():
     port = int(os.environ.get("PORT", 8080))  # Render assigns a PORT environment variable
     server_address = ('0.0.0.0', port)
     httpd = HTTPServer(server_address, SimpleHandler)
-    print(f"Serving HTTP on port {port}")
+    logging.info(f"Serving HTTP on port {port}")
     httpd.serve_forever()
 
 # Start the HTTP server in a separate thread
