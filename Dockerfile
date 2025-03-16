@@ -1,12 +1,21 @@
-# Use Python base image
+# Use a lightweight Python base image
 FROM python:3.8-slim
 
-# Install system dependencies for ChromeDriver and Chromium
+# Install system dependencies for Chromium and ChromeDriver
 RUN apt-get update && apt-get install -y \
+    chromium \
     chromium-driver \
-    chromium-browser \
     wget \
-    unzip && \
+    unzip \
+    libnss3 \
+    libx11-6 \
+    libatk-bridge2.0-0 \
+    libatspi2.0-0 \
+    libgtk-3-0 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxrandr2 && \
     rm -rf /var/lib/apt/lists/*
 
 # Set working directory in the container
