@@ -1,0 +1,18 @@
+environment:
+  name: python
+  version: 3.8
+
+build:
+  commands:
+    - pip install -r requirements.txt
+
+start:
+  command: python src/headless.py
+  instances: 1
+  env:
+    CHESS_URL: "https://www.chess.com/login/"
+    PROFILE_URL: "https://www.chess.com/member/{}"
+    BACKEND_URL: "https://cg-s5v9.onrender.com"
+    USERNAME: "SMURFEEE"
+    PASSWORD: "Aminousa1"
+    USERNAME_TO_WATCH: "amphetamine4003"
